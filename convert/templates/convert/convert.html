@@ -25,8 +25,31 @@
                         </li>
                     </ul>
                 </nav>
+                {% if result %}
                 <div>
-                    <form action="" method="post" id="unit_form">
+                    <p>Result of your calculation</p>
+                    <strong>{{input_value}} {{from_unit|capfirst}} =
+                        {{result|floatformat:2}} {{to_unit|capfirst}}</strong>
+                    <br>
+                    {% if convert_type == "length" %}
+                    <button onclick="window.location='{% url 'convert:length' %}'"
+                        type="button">Reset</button>
+                    {% elif convert_type == "weight" %}
+                    <button onclick="window.location='{% url 'convert:weight' %}'"
+                        type="button">Reset</button>
+                    {% else %}
+                    <button onclick="window.location='{% url 'convert:temperature' %}'"
+                        type="button">Reset</button>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div>
+                    <div>
+                        {% if error_msg %}
+                        <p>Error : {{error_msg}}</p>
+                        {% endif %}
+                    </div>
+                    <form action="" method="get" id="unit_form">
                         {% csrf_token %}
                         <label for="input_value">
                             Enter the {{convert_type | lower}} to convert
@@ -51,6 +74,7 @@
                         <input type="reset" value="Reset">
                     </form>
                 </div>
+                {% endif %}
             </div>
         </main>
         <script>
@@ -67,6 +91,9 @@
             }
 
             function generate_options(target) {
+                if (!target) {
+                    return;
+                }
                 target.innerHTML = '';
                 for (let idx = 0; idx < units.length; ++idx) {
                     const unit = units[idx];
@@ -78,6 +105,9 @@
             }
 
             function find_other(target, other_unit) {
+                if (!target) {
+                    return;
+                }
                 if (target.value != other_unit) {
                     return;
                 }
@@ -94,21 +124,23 @@
             const from_unit = document.getElementById('from_unit');
             const to_unit = document.getElementById('to_unit');
             const unit_form = document.getElementById('unit_form');
-            generate_options(from_unit);
-            generate_options(to_unit);
-            find_other(to_unit, from_unit.value);
-            from_unit.addEventListener('change', function (e) {
+            if (from_unit && to_unit && unit_form) {
+                generate_options(from_unit);
+                generate_options(to_unit);
                 find_other(to_unit, from_unit.value);
-            });
-            to_unit.addEventListener('change', function (e) {
-                find_other(from_unit, to_unit.value);
-            });
-
-            unit_form.addEventListener('reset', function (e) {
-                setTimeout(function() {
+                from_unit.addEventListener('change', function (e) {
                     find_other(to_unit, from_unit.value);
                 });
-            });
+                to_unit.addEventListener('change', function (e) {
+                    find_other(from_unit, to_unit.value);
+                });
+
+                unit_form.addEventListener('reset', function (e) {
+                    setTimeout(function() {
+                        find_other(to_unit, from_unit.value);
+                    });
+                });
+            }
 
             {% endblock %}
         </script>

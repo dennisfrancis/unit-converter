@@ -2,29 +2,66 @@ from django.shortcuts import render
 from django.views import View
 
 from enum import Enum
-from typing import List, Set
+from typing import List, Dict, Optional
 
 
 def get_str_units_list(enum_class) -> List[str]:
     return [unit.name.lower() for unit in enum_class]
 
 
-def get_str_units_set(enum_class) -> Set[str]:
-        return set(get_str_units_list(enum_class))
+def get_str_units_map(enum_class) -> Dict[str, Enum]:
+    return {unit.name.lower(): unit for unit in enum_class}
+
+
+def get_result(enum_map, get_params, converter, ctx) -> Optional[float]:
+    got_units = True
+    from_unit = None
+    to_unit = None
+    units_in_dict = ("from_unit" in get_params and "to_unit" in get_params)
+    try:
+        from_unit, to_unit = \
+            enum_map[get_params["from_unit"]], \
+            enum_map[get_params["to_unit"]]
+    except Exception:
+        if units_in_dict:
+            ctx["error_msg"] = "Invalid units!"
+        got_units = False
+
+    got_value = True
+    value_in_dict = False
+    if "input_value" in get_params:
+        value_in_dict = True
+    input_value = 0.0
+    try:
+        input_value = float(get_params["input_value"])
+    except Exception:
+        if value_in_dict:
+            ctx["error_msg"] = "Invalid input value"
+        got_value = False
+
+    if got_units and from_unit is not None and to_unit is not None:
+        ctx["from_unit"], ctx["to_unit"] = from_unit.name.lower(), \
+                to_unit.name.lower()
+    if got_value:
+        ctx["input_value"] = str(input_value)
+
+    return converter(from_unit, to_unit, input_value) \
+        if got_value and got_units else None
 
 
 class LengthUnits(Enum):
     Millimeter = 1.0
-    Centimeter = 10.0 * Millimeter
-    Meter = 100.0 * Centimeter
-    Kilometer = 1000.0 * Meter
-    Inch = 25.4 * Millimeter
-    Foot = 12 * Inch
-    Yard = 3 * Foot
-    Mile = 1760 * Yard
+    Centimeter = Millimeter / 10.0
+    Meter = Centimeter / 100.0
+    Kilometer = Meter / 1000.0
+    Inch = Millimeter / 25.4
+    Foot = Inch / 12.0
+    Yard = Foot / 3.0
+    Mile = Yard / 1760.0
 
     @staticmethod
-    def convert(src: "LengthUnits", dest: "LengthUnits", value: float) -> float:
+    def convert(src: "LengthUnits", dest: "LengthUnits",
+                value: float) -> float:
         return (value / src.value) * dest.value
 
 
@@ -32,29 +69,34 @@ class LengthView(View):
     template_name = "convert/length.html"
     convert_type = "length"
     units = get_str_units_list(LengthUnits)
-    unit_set = set(units)
+    units_map = get_str_units_map(LengthUnits)
 
     def get(self, request):
         ctx = {"units": self.units,
                "convert_type": self.convert_type,
                }
+
+        result = get_result(self.units_map,
+                            request.GET,
+                            LengthUnits.convert, ctx)
+        if result is not None:
+            ctx["result"] = str(result)
+
         return render(request,
                       self.template_name,
                       ctx)
 
-    def post(self, request):
-        return render(request, self.template_name)
-
 
 class WeightUnits(Enum):
     Milligram = 1.0
-    Gram = 1000.0 * Milligram
-    Kilogram = 1000.0 * Gram
-    Ounce = 28349.5 * Milligram
-    Pound = 16.0 * Ounce
+    Gram = Milligram / 1000.0
+    Kilogram = Gram / 1000.0
+    Ounce = Milligram / 28349.5
+    Pound = Ounce / 16.0
 
     @staticmethod
-    def convert(src: "WeightUnits", dest: "WeightUnits", value: float) -> float:
+    def convert(src: "WeightUnits", dest: "WeightUnits",
+                value: float) -> float:
         return (value / src.value) * dest.value
 
 
@@ -62,18 +104,20 @@ class WeightView(View):
     template_name = "convert/weight.html"
     convert_type = "weight"
     units = get_str_units_list(WeightUnits)
-    unit_set = set(units)
+    units_map = get_str_units_map(WeightUnits)
 
     def get(self, request):
         ctx = {"units": self.units,
                "convert_type": self.convert_type,
                }
+        result = get_result(self.units_map,
+                            request.GET,
+                            WeightUnits.convert, ctx)
+        if result is not None:
+            ctx["result"] = str(result)
         return render(request,
                       self.template_name,
                       ctx)
-
-    def post(self, request):
-        return render(request, self.template_name)
 
 
 class TemperatureUnits(Enum):
@@ -82,7 +126,8 @@ class TemperatureUnits(Enum):
     Kelvin = 3
 
     @staticmethod
-    def convert(src: "TemperatureUnits", dest: "TemperatureUnits", value: float) -> float:
+    def convert(src: "TemperatureUnits", dest: "TemperatureUnits",
+                value: float) -> float:
         if src == dest:
             return value
         tu = TemperatureUnits
@@ -107,25 +152,18 @@ class TemperatureView(View):
     template_name = "convert/temperature.html"
     convert_type = "temperature"
     units = get_str_units_list(TemperatureUnits)
+    units_map = get_str_units_map(TemperatureUnits)
     unit_set = set(units)
 
     def get(self, request):
         ctx = {"units": self.units,
                "convert_type": self.convert_type,
                }
+        result = get_result(self.units_map,
+                            request.GET,
+                            TemperatureUnits.convert, ctx)
+        if result is not None:
+            ctx["result"] = str(result)
         return render(request,
                       self.template_name,
                       ctx)
-
-    def post(self, request):
-        return render(request, self.template_name)
-
-
-class ResultView(View):
-    template_name = "convert/result.html"
-
-    def get(self, request):
-        return render(request, self.template_name)
-
-    def post(self, request):
-        return render(request, self.template_name)
