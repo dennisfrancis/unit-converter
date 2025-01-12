@@ -4,14 +4,113 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>{% block title %}{settings.APP_NAME}{% endblock %}</title>
-        <!--<link rel="stylesheet" href="./style.css">-->
+        <title>Unit Converter</title>
         <link rel="icon" href="./favicon.ico" type="image/x-icon">
     </head>
     <body>
         <main>
-            <h1>Unit Converter</h1>
+            <div>
+                <h1>Unit Converter</h1>
+                <nav>
+                    <ul>
+                        <li>
+                            <a href="{% url 'convert:length' %}">Length</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'convert:weight' %}">Weight</a>
+                        </li>
+                        <li>
+                            <a href="{% url 'convert:temperature' %}">
+                                Temperature</a>
+                        </li>
+                    </ul>
+                </nav>
+                <div>
+                    <form action="" method="post" id="unit_form">
+                        {% csrf_token %}
+                        <label for="input_value">
+                            Enter the {{convert_type | lower}} to convert
+                        </label><br>
+                        <input type="number" id="input_value"
+                            name="input_value" required>
+                        <br>
+
+                        <label for="from_unit">Unit to convert from</label>
+                        <br>
+                        <select id="from_unit" name="from_unit">
+                        </select>
+
+                        <br>
+                        <label for="to_unit">Unit to convert to</label>
+                        <br>
+                        <select id="to_unit" name="to_unit">
+                        </select>
+
+                        <br>
+                        <input type="submit" value="Convert">
+                        <input type="reset" value="Reset">
+                    </form>
+                </div>
+            </div>
         </main>
-        <!--<script src="index.js"></script> -->
+        <script>
+            {% block scripts %}
+
+            const units = [
+                {% for unit in units %}
+                '{{unit}}',
+                {% endfor %}
+            ];
+
+            function capitalizeFirstLetter(val) {
+                return String(val).charAt(0).toUpperCase() + String(val).slice(1);
+            }
+
+            function generate_options(target) {
+                target.innerHTML = '';
+                for (let idx = 0; idx < units.length; ++idx) {
+                    const unit = units[idx];
+                    const item = document.createElement('option');
+                    item.value = unit;
+                    item.innerHTML = capitalizeFirstLetter(units[idx]);
+                    target.appendChild(item);
+                }
+            }
+
+            function find_other(target, other_unit) {
+                if (target.value != other_unit) {
+                    return;
+                }
+
+                for (let idx = 0; idx < units.length; ++idx) {
+                    const unit = units[idx];
+                    if (unit != other_unit) {
+                        target.value = unit;
+                        return;
+                    }
+                }
+            }
+
+            const from_unit = document.getElementById('from_unit');
+            const to_unit = document.getElementById('to_unit');
+            const unit_form = document.getElementById('unit_form');
+            generate_options(from_unit);
+            generate_options(to_unit);
+            find_other(to_unit, from_unit.value);
+            from_unit.addEventListener('change', function (e) {
+                find_other(to_unit, from_unit.value);
+            });
+            to_unit.addEventListener('change', function (e) {
+                find_other(from_unit, to_unit.value);
+            });
+
+            unit_form.addEventListener('reset', function (e) {
+                setTimeout(function() {
+                    find_other(to_unit, from_unit.value);
+                });
+            });
+
+            {% endblock %}
+        </script>
     </body>
 </html>
