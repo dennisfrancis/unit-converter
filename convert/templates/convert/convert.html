@@ -1,140 +1,72 @@
-<!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta http-equiv="X-UA-Compatible" content="ie=edge">
-        <title>Unit Converter</title>
-        <link rel="icon" href="./favicon.ico" type="image/x-icon">
-    </head>
-    <body>
-        <main>
-            <div>
-                <h1>Unit Converter</h1>
-                <nav>
-                    <ul>
-                        <li>
-                            <a href="{% url 'convert:length' %}">Length</a>
-                        </li>
-                        <li>
-                            <a href="{% url 'convert:weight' %}">Weight</a>
-                        </li>
-                        <li>
-                            <a href="{% url 'convert:temperature' %}">
-                                Temperature</a>
-                        </li>
-                    </ul>
-                </nav>
-                {% if result %}
-                <div>
-                    <p>Result of your calculation</p>
-                    <strong>{{input_value}} {{from_unit|capfirst}} =
-                        {{result|floatformat:2}} {{to_unit|capfirst}}</strong>
-                    <br>
-                    {% if convert_type == "length" %}
-                    <button onclick="window.location='{% url 'convert:length' %}'"
-                        type="button">Reset</button>
-                    {% elif convert_type == "weight" %}
-                    <button onclick="window.location='{% url 'convert:weight' %}'"
-                        type="button">Reset</button>
-                    {% else %}
-                    <button onclick="window.location='{% url 'convert:temperature' %}'"
-                        type="button">Reset</button>
-                    {% endif %}
-                </div>
-                {% else %}
-                <div>
-                    <div>
-                        {% if error_msg %}
-                        <p>Error : {{error_msg}}</p>
-                        {% endif %}
-                    </div>
-                    <form action="" method="get" id="unit_form">
-                        {% csrf_token %}
-                        <label for="input_value">
-                            Enter the {{convert_type | lower}} to convert
-                        </label><br>
-                        <input type="number" id="input_value"
-                            name="input_value" required>
-                        <br>
+{% extends "convert/base.html" %}
+{% load static %}
 
-                        <label for="from_unit">Unit to convert from</label>
-                        <br>
-                        <select id="from_unit" name="from_unit">
-                            {% for unit in units %}
-                            <option value="{{unit}}">{{unit | capfirst}}</option>
-                            {% endfor %}
-                        </select>
+{% block navbar %}
+{% include "convert/navbar.html" %}
+{% endblock %}
 
-                        <br>
-                        <label for="to_unit">Unit to convert to</label>
-                        <br>
-                        <select id="to_unit" name="to_unit">
-                            {% for unit in units %}
-                            <option value="{{unit}}">{{unit | capfirst}}</option>
-                            {% endfor %}
-                        </select>
-                        <br>
-                        <button type="button" onclick="swap_units()">Swap units</button>
-                        <br>
+{% block content %}
+{% if result %}
+<div>
+    <p>Result of your calculation</p>
+    <strong>{{input_value}} {{from_unit|capfirst}} =
+        {{result|floatformat:2}} {{to_unit|capfirst}}</strong>
+    <br>
+    {% if convert_type == "length" %}
+    <button onclick="window.location='{% url 'convert:length' %}'"
+        type="button">Reset</button>
+    {% elif convert_type == "weight" %}
+    <button onclick="window.location='{% url 'convert:weight' %}'"
+        type="button">Reset</button>
+    {% else %}
+    <button onclick="window.location='{% url 'convert:temperature' %}'"
+        type="button">Reset</button>
+    {% endif %}
+</div>
+{% else %}
+<div>
+    <div>
+        {% if error_msg %}
+        <p>Error : {{error_msg}}</p>
+        {% endif %}
+    </div>
+    <form action="" method="get" id="unit_form">
+        {% csrf_token %}
+        <label for="input_value">
+            Enter the {{convert_type | lower}} to convert
+        </label><br>
+        <input type="number" id="input_value"
+            name="input_value" required>
+        <br>
 
-                        <br>
-                        <input type="submit" value="Convert">
-                        <input type="reset" value="Reset">
-                    </form>
-                </div>
-                {% endif %}
-            </div>
-        </main>
-        <script>
-            {% block scripts %}
+        <label for="from_unit">Unit to convert from</label>
+        <br>
+        <select id="from_unit" name="from_unit">
+            {% for unit in units %}
+            <option value="{{unit}}">{{unit | capfirst}}</option>
+            {% endfor %}
+        </select>
 
-            function set_different_option(target, other) {
-                const unit = target.value;
-                const other_unit = other.value;
-                if (unit != other_unit) {
-                    return;
-                }
+        <br>
+        <label for="to_unit">Unit to convert to</label>
+        <br>
+        <select id="to_unit" name="to_unit">
+            {% for unit in units %}
+            <option value="{{unit}}">{{unit | capfirst}}</option>
+            {% endfor %}
+        </select>
+        <br>
+        <button type="button" onclick="swap_units()">Swap units</button>
+        <br>
 
-                const n = target.options.length;
-                for (let idx = 0; idx < n; ++idx) {
-                    const this_unit = target.options[idx].value;
-                    if (unit != this_unit) {
-                        target.value = this_unit;
-                        return;
-                    }
-                }
-            }
+        <br>
+        <input type="submit" value="Convert">
+        <input type="reset" value="Reset">
+    </form>
+</div>
+{% endif %}
+{% endblock %}
 
-
-            const from_unit = document.getElementById('from_unit');
-            const to_unit = document.getElementById('to_unit');
-            const unit_form = document.getElementById('unit_form');
-
-            function swap_units() {
-                const u1 = from_unit.value;
-                const u2 = to_unit.value;
-                from_unit.value = u2;
-                to_unit.value = u1;
-            }
-
-            if (from_unit && to_unit && unit_form) {
-                set_different_option(to_unit, from_unit);
-                from_unit.addEventListener('change', function (e) {
-                    set_different_option(to_unit, from_unit);
-                });
-                to_unit.addEventListener('change', function (e) {
-                    set_different_option(from_unit, to_unit);
-                });
-
-                unit_form.addEventListener('reset', function (e) {
-                    setTimeout(function() {
-                        set_different_option(to_unit, from_unit);
-                    });
-                });
-            }
-
-            {% endblock %}
-        </script>
-    </body>
-</html>
+{% block scripts %}
+<script src="{% static 'convert/units.js' %}"></script>
+{% endblock %}

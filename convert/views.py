@@ -66,7 +66,7 @@ class LengthUnits(Enum):
 
 
 class LengthView(View):
-    template_name = "convert/length.html"
+    template_name = "convert/convert.html"
     convert_type = "length"
     units = get_str_units_list(LengthUnits)
     units_map = get_str_units_map(LengthUnits)
@@ -101,7 +101,7 @@ class WeightUnits(Enum):
 
 
 class WeightView(View):
-    template_name = "convert/weight.html"
+    template_name = "convert/convert.html"
     convert_type = "weight"
     units = get_str_units_list(WeightUnits)
     units_map = get_str_units_map(WeightUnits)
@@ -149,7 +149,7 @@ class TemperatureUnits(Enum):
 
 
 class TemperatureView(View):
-    template_name = "convert/temperature.html"
+    template_name = "convert/convert.html"
     convert_type = "temperature"
     units = get_str_units_list(TemperatureUnits)
     units_map = get_str_units_map(TemperatureUnits)
