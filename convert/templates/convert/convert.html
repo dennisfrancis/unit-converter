@@ -32,36 +32,45 @@
     </div>
     <form action="" method="get" id="unit_form">
         {% csrf_token %}
-        <label for="input_value">
-            Enter the {{convert_type | lower}} to convert
-        </label><br>
-        <input type="number" id="input_value"
-            name="input_value" required>
+        <div class="form-group">
+            <label for="input_value">
+                Enter the {{convert_type | lower}} to convert
+            </label><br>
+            <input class="form-control"
+                type="number" id="input_value"
+                name="input_value" required>
+        </div>
         <br>
 
-        <label for="from_unit">Unit to convert from</label>
-        <br>
-        <select id="from_unit" name="from_unit">
-            {% for unit in units %}
-            <option value="{{unit}}">{{unit | capfirst}}</option>
-            {% endfor %}
-        </select>
-
-        <br>
-        <label for="to_unit">Unit to convert to</label>
-        <br>
-        <select id="to_unit" name="to_unit">
-            {% for unit in units %}
-            <option value="{{unit}}">{{unit | capfirst}}</option>
-            {% endfor %}
-        </select>
-        <br>
-        <button type="button" onclick="swap_units()">Swap units</button>
+        <div class="form-group">
+            <label for="from_unit">Unit to convert from</label>
+            <br>
+            <select class="form-control"
+                id="from_unit" name="from_unit">
+                {% for unit in units %}
+                <option value="{{unit}}">{{unit | capfirst}}</option>
+                {% endfor %}
+            </select>
+        </div>
         <br>
 
+        <div class="form-group">
+            <label for="to_unit">Unit to convert to</label>
+            <select class="form-control"
+                id="to_unit" name="to_unit">
+                {% for unit in units %}
+                <option value="{{unit}}">{{unit | capfirst}}</option>
+                {% endfor %}
+            </select>
+        </div>
         <br>
-        <input type="submit" value="Convert">
-        <input type="reset" value="Reset">
+        <button class="btn btn-success" type="button"
+            onclick="swap_units()">Swap units</button>
+        <br>
+        <br>
+
+        <input class="btn btn-primary" type="submit" value="Convert">
+        <input class="btn btn-danger" type="reset" value="Reset">
     </form>
 </div>
 {% endif %}
@@ -69,4 +78,21 @@
 
 {% block scripts %}
 <script src="{% static 'convert/units.js' %}"></script>
+<script>
+
+function select_in_navbar() {
+    let ul = document.getElementById('navul');
+    let items = ul.getElementsByTagName('li');
+    for (let idx = 0; idx < items.length; ++idx) {
+        const item = items[idx];
+        const content = item.innerText.toLowerCase();
+        if (content == '{{convert_type}}') {
+            item.classList.add('selected-item');
+        } else {
+            item.classList.remove('selected-item');
+        }
+    }
+}
+select_in_navbar();
+</script>
 {% endblock %}

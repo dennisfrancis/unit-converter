@@ -1,0 +1,32 @@
+body {
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+ul.dfnavbar {
+    list-style-type: none;
+    margin: 0 0 10px 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #fff;
+}
+
+li.dfnavbar {
+    float: left;
+}
+
+li.dfnavbar a {
+    display: block;
+    color: black;
+    text-align: center;
+    padding: 10px 16px;
+    text-decoration: none;
+}
+
+li.dfnavbar a:hover {
+    color: blue;
+}
+
+.selected-item {
+    border-bottom: 2px solid blue;
+}
