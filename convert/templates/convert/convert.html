@@ -12,7 +12,7 @@
     <h3>Result of your calculation</h3>
     <br>
     <p>
-        <strong>{{input_value|floatformat:2}}</strong>
+        <strong>{{input_value}}</strong>
         <em> {{from_unit|capfirst}}</em> =
         <strong> {{result|floatformat:2}}</strong>
         <em> {{to_unit|capfirst}}</em>
@@ -43,7 +43,7 @@
                 Enter the {{convert_type | lower}} to convert
             </label><br>
             <input class="form-control"
-                type="number" id="input_value"
+                type="number" id="input_value" step="any"
                 name="input_value" required>
         </div>
         <br>
