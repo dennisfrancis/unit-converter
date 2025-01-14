@@ -20,7 +20,7 @@ pip install -r ./requirements.txt
 python3 manage.py runserver
 ```
 
-4. Point the browser to the URL `127.0.0.1:8000/convert/length` or `127.0.0.1:8000/convert/weight` or `127.0.0.1:8000/convert/temperature`
+4. Point the browser to the URL `127.0.0.1:8000/convert`
 
 ## Acknowledgements
 This project was created from the specs provided at [roadmap.sh](https://roadmap.sh/projects/unit-converter).
