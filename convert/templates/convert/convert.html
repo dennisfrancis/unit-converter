@@ -8,18 +8,24 @@
 {% block content %}
 {% if result %}
 <div>
-    <p>Result of your calculation</p>
-    <strong>{{input_value}} {{from_unit|capfirst}} =
-        {{result|floatformat:2}} {{to_unit|capfirst}}</strong>
+    <br>
+    <h3>Result of your calculation</h3>
+    <br>
+    <p>
+        <strong>{{input_value|floatformat:2}}</strong>
+        <em> {{from_unit|capfirst}}</em> =
+        <strong> {{result|floatformat:2}}</strong>
+        <em> {{to_unit|capfirst}}</em>
+    </p>
     <br>
     {% if convert_type == "length" %}
-    <button onclick="window.location='{% url 'convert:length' %}'"
+    <button class="btn btn-danger" onclick="window.location='{% url 'convert:length' %}'"
         type="button">Reset</button>
     {% elif convert_type == "weight" %}
-    <button onclick="window.location='{% url 'convert:weight' %}'"
+    <button class="btn btn-danger" onclick="window.location='{% url 'convert:weight' %}'"
         type="button">Reset</button>
     {% else %}
-    <button onclick="window.location='{% url 'convert:temperature' %}'"
+    <button class="btn btn-danger" onclick="window.location='{% url 'convert:temperature' %}'"
         type="button">Reset</button>
     {% endif %}
 </div>
@@ -27,7 +33,7 @@
 <div>
     <div>
         {% if error_msg %}
-        <p>Error : {{error_msg}}</p>
+        <div class="alert alert-danger" role="alert">{{error_msg}}</div>
         {% endif %}
     </div>
     <form action="" method="get" id="unit_form">
